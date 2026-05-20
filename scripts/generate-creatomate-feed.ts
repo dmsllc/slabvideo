@@ -143,7 +143,7 @@ async function main() {
 
     const soldCompsListing = await findSoldCompsListing(candidate, warnings);
     let serpListing: Listing | undefined;
-    let finalImageUrl = soldCompsListing?.imageUrl ?? "";
+    let finalImageUrl = isUsableImageUrl(soldCompsListing?.imageUrl ?? "") ? soldCompsListing?.imageUrl ?? "" : "";
 
     if (!finalImageUrl) {
       serpListing = await findSerpApiListing(candidate, warnings);
@@ -488,7 +488,7 @@ async function findSoldCompsListing(candidate: Candidate, warnings: string[]): P
       "X-API-Key": SOLDCOMPS_API_KEY,
       Accept: "application/json",
     });
-    return pickBestListing(extractListings(json, "SoldComps"), candidate);
+    return pickBestListing(extractListings(json, "SoldComps"), candidate, false);
   } catch (error) {
     warnings.push(`SoldComps lookup failed for ${formatCardDisplayName(candidate)}: ${errorMessage(error)}`);
     return undefined;
@@ -510,7 +510,7 @@ async function findSerpApiListing(candidate: Candidate, warnings: string[]): Pro
 
   try {
     const json = await fetchJson(url, { Accept: "application/json" });
-    return pickBestListing(extractListings(json, "SerpAPI"), candidate);
+    return pickBestListing(extractListings(json, "SerpAPI"), candidate, true);
   } catch (error) {
     warnings.push(`SerpAPI lookup failed for ${formatCardDisplayName(candidate)}: ${errorMessage(error)}`);
     return undefined;
@@ -550,9 +550,9 @@ function extractListings(json: unknown, source: Listing["source"]): Listing[] {
   });
 }
 
-function pickBestListing(listings: Listing[], candidate: Candidate): Listing | undefined {
+function pickBestListing(listings: Listing[], candidate: Candidate, requireImage: boolean): Listing | undefined {
   return listings
-    .filter((listing) => isUsableImageUrl(listing.imageUrl))
+    .filter((listing) => !requireImage || isUsableImageUrl(listing.imageUrl))
     .filter((listing) => isAllowedListingTitle(listing.title))
     .filter((listing) => listingMatchesCandidate(listing, candidate))
     .sort((a, b) => scoreListing(b, candidate) - scoreListing(a, candidate))[0];
@@ -564,7 +564,9 @@ function listingMatchesCandidate(listing: Listing, candidate: Candidate): boolea
     .split(" ")
     .filter((word) => word.length >= 4);
   const matchingWords = cardWords.filter((word) => text.includes(word)).length;
-  const hasNumber = !candidate.cardNumber || text.includes(normalizeSearchText(candidate.cardNumber));
+  const normalizedCardNumber = normalizeSearchText(candidate.cardNumber);
+  const bareCardNumber = normalizedCardNumber.replace(/^#/, "");
+  const hasNumber = !candidate.cardNumber || text.includes(normalizedCardNumber) || text.includes(bareCardNumber);
 
   return text.includes("psa") && text.includes("10") && hasNumber && matchingWords >= Math.min(2, cardWords.length);
 }
@@ -575,8 +577,9 @@ function scoreListing(listing: Listing, candidate: Candidate): number {
 
   if (listing.listingUrl.includes("ebay.")) score += 20;
   if (text.includes("psa 10") || text.includes("psa10")) score += 20;
+  if (isUsableImageUrl(listing.imageUrl)) score += 15;
   if (text.includes("slab") || text.includes("graded")) score += 10;
-  if (candidate.cardNumber && text.includes(normalizeSearchText(candidate.cardNumber))) score += 10;
+  if (candidate.cardNumber && text.includes(normalizeSearchText(candidate.cardNumber).replace(/^#/, ""))) score += 10;
   if (listing.soldDate) score += 5;
   if (listing.price && listing.price >= candidate.currentPriceCents / 100 * 0.6) score += 5;
 
