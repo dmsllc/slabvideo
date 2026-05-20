@@ -1,0 +1,45 @@
+{
+  "date": "2026-05-20",
+  "rows": [
+    {
+      "id": "197012",
+      "product-name": "Charizard #4",
+      "console-name": "Pokemon Base Set",
+      "genre": "Pokemon",
+      "psa-10-price": 75000,
+      "sales-volume": 130
+    },
+    {
+      "id": "197013",
+      "product-name": "Pikachu #58",
+      "console-name": "Pokemon Base Set",
+      "genre": "Pokemon",
+      "psa-10-price": 12000,
+      "sales-volume": 90
+    },
+    {
+      "id": "197014",
+      "product-name": "Blastoise #2",
+      "console-name": "Pokemon Base Set",
+      "genre": "Pokemon",
+      "psa-10-price": 22000,
+      "sales-volume": 65
+    },
+    {
+      "id": "197015",
+      "product-name": "Venusaur #15",
+      "console-name": "Pokemon Base Set",
+      "genre": "Pokemon",
+      "psa-10-price": 14000,
+      "sales-volume": 50
+    },
+    {
+      "id": "197016",
+      "product-name": "Mewtwo #10",
+      "console-name": "Pokemon Base Set",
+      "genre": "Pokemon",
+      "psa-10-price": 18000,
+      "sales-volume": 75
+    }
+  ]
+}
