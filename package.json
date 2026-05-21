@@ -1,0 +1,14 @@
+{
+  "name": "slabvideo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:creatomate": "tsx scripts/generate-creatomate-feed.ts",
+    "populate:creatomate": "tsx scripts/src/populateCreatomateMarketFeed.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
