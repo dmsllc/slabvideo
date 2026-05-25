@@ -10,7 +10,7 @@
 
 - The script runs via `tsx` (TypeScript Execute): `tsx scripts/generate-creatomate-feed.ts`
 - Node.js v22+ is required (for native `fetch` support).
-- There is no `package.json` — `tsx`, `typescript`, and `@types/node` are installed globally.
+- `pnpm install` installs `tsx`, `typescript`, and `@types/node` locally (also available globally in cloud VMs).
 
 ### Type-checking
 
@@ -23,13 +23,30 @@ tsc --noEmit --strict --target ES2022 --module nodenext --moduleResolution noden
   scripts/generate-creatomate-feed.ts
 ```
 
-### Running the script
+### Running the scripts
+
+Discover top movers automatically:
 
 ```sh
 tsx scripts/generate-creatomate-feed.ts
+# or
+pnpm run generate:creatomate
 ```
 
-The script reads PriceCharting snapshot data from `data/pricecharting-snapshots/` (JSON or CSV files with dates in the filename or content). It outputs `creatomate-market-alert-feed.csv` and `creatomate-market-alert-debug.json` in the working directory.
+Populate a fixed 10-card Creatomate import CSV (reads `data/creatomate-market-alert-feed.csv`, fills missing image and price cells):
+
+```sh
+pnpm tsx scripts/src/populateCreatomateMarketFeed.ts
+# or
+pnpm run populate:creatomate
+```
+
+Outputs for the populate script (override with env vars):
+
+- `/tmp/slabfolio-creatomate-market-alert-feed-populated.csv`
+- `/tmp/slabfolio-creatomate-market-alert-debug.json`
+
+The generate script reads PriceCharting snapshot data from `data/pricecharting-snapshots/` (JSON or CSV files with dates in the filename or content). It outputs `creatomate-market-alert-feed.csv` and `creatomate-market-alert-debug.json` in the working directory.
 
 ### Environment variables (all optional)
 
