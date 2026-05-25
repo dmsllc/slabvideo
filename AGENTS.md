@@ -35,7 +35,7 @@ The script reads PriceCharting snapshot data from `data/pricecharting-snapshots/
 
 | Variable | Purpose |
 |---|---|
-| `PRICECHARTING_API_TOKEN` | Refresh current card prices via PriceCharting API |
+| `PRICECHARTING_API_TOKEN` / `pricecharting_API_key` | Refresh current card prices via PriceCharting API |
 | `SOLDCOMPS_API_KEY` | Look up sold listing images from SoldComps |
 | `SERPAPI_API_KEY` | Fallback image search via eBay sold results |
 

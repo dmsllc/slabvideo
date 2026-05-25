@@ -70,7 +70,7 @@ const MIN_CURRENT_CENTS = dollarsToCents(Number(process.env.MIN_CURRENT_PRICE ??
 const MIN_PRIOR_CENTS = dollarsToCents(Number(process.env.MIN_PRIOR_PRICE ?? 50));
 const MIN_GAIN_CENTS = dollarsToCents(Number(process.env.MIN_ABSOLUTE_GAIN ?? 50));
 const MIN_GAIN_PERCENT = Number(process.env.MIN_GAIN_PERCENT ?? 20);
-const PRICECHARTING_TOKEN = process.env.PRICECHARTING_API_TOKEN;
+const PRICECHARTING_TOKEN = process.env.PRICECHARTING_API_TOKEN ?? process.env.pricecharting_API_key;
 const SOLDCOMPS_API_KEY = process.env.SOLDCOMPS_API_KEY;
 const SERPAPI_API_KEY = process.env.SERPAPI_API_KEY;
 const SOLDCOMPS_API_URL = process.env.SOLDCOMPS_API_URL ?? "https://api.soldcomps.com/v1/search";
@@ -116,7 +116,9 @@ async function main() {
   const skipped: Array<Record<string, unknown>> = [];
 
   if (!PRICECHARTING_TOKEN) {
-    warnings.push("PRICECHARTING_API_TOKEN is not set; current prices will come only from local snapshots.");
+    warnings.push(
+      "PRICECHARTING_API_TOKEN is not set; current prices will come only from local snapshots. Also checked legacy alias pricecharting_API_key.",
+    );
   }
   if (!SOLDCOMPS_API_KEY) {
     warnings.push("SOLDCOMPS_API_KEY is not set; SoldComps image lookup will be skipped.");
