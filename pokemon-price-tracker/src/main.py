@@ -49,6 +49,8 @@ def main() -> int:
     rows = build_output_rows(cards_master, price_client, image_client)
     output_path = write_output(rows)
     logger.info("Wrote %s (%s rows)", output_path, len(rows))
+    with_images = sum(1 for row in rows if row.get("Image-JZ4"))
+    logger.info("Rows with image URLs: %s / %s", with_images, len(rows))
     return 0
 
 

@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 import logging
 import re
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, urlparse
 
 import requests
 
 logger = logging.getLogger(__name__)
 
 SCRAPINGBEE_API = "https://app.scrapingbee.com/api/v1/"
+PRICECHARTING_SEARCH = "https://www.pricecharting.com/search-products"
 
 
 class ScrapingBeeClient:
@@ -20,17 +21,17 @@ class ScrapingBeeClient:
         self.session = requests.Session()
 
     def fetch_image_url(self, card_name: str, set_name: str, card_number: str) -> str | None:
-        query = f"{card_name} {set_name} {card_number} Pokemon PSA 10 card"
-        search_url = f"https://www.google.com/search?q={quote(query)}&tbm=isch"
+        query = " ".join(
+            part
+            for part in (card_name, set_name, card_number.replace("#", ""))
+            if part
+        )
+        search_url = f"{PRICECHARTING_SEARCH}?q={quote(query)}"
 
         extract_rules = {
-            "images": {
-                "selector": "img",
-                "type": "list",
-                "output": {
-                    "src": "@src",
-                    "data_src": "@data-src",
-                },
+            "cover": {
+                "selector": "table img",
+                "output": "@src",
             }
         }
 
@@ -40,8 +41,7 @@ class ScrapingBeeClient:
                 params={
                     "api_key": self.api_key,
                     "url": search_url,
-                    "render_js": "true",
-                    "wait": "3000",
+                    "render_js": "false",
                     "extract_rules": json.dumps(extract_rules),
                 },
                 timeout=60,
@@ -57,17 +57,9 @@ class ScrapingBeeClient:
             logger.error("ScrapingBee returned non-JSON response for %s", query)
             return None
 
-        images = payload.get("images", [])
-        if not isinstance(images, list):
-            return None
-
-        for image in images:
-            if not isinstance(image, dict):
-                continue
-            for key in ("src", "data_src"):
-                url = _normalize_https(image.get(key))
-                if url and _looks_like_image(url):
-                    return url
+        cover = payload.get("cover")
+        if isinstance(cover, str):
+            return _normalize_https(cover)
         return None
 
 
@@ -83,16 +75,16 @@ def _normalize_https(url: str | None) -> str | None:
         url = "https://" + url[len("http://") :]
     if not url.startswith("https://"):
         return None
+    if not _looks_like_image(url):
+        return None
     return url
 
 
 def _looks_like_image(url: str) -> bool:
     lowered = url.lower()
-    if "gstatic.com/images" in lowered or "google.com/images" in lowered:
-        return False
-    if re.search(r"\.(jpg|jpeg|png|webp)(\?|$)", lowered):
+    if "pricecharting.com" in lowered or "storage.googleapis.com/images.pricecharting" in lowered:
         return True
-    if "ebayimg.com" in lowered or "pricecharting.com" in lowered or "tcgplayer" in lowered:
+    if re.search(r"\.(jpg|jpeg|png|webp)(\?|$)", lowered):
         return True
     parsed = urlparse(url)
     return bool(parsed.netloc)
